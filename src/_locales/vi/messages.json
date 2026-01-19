@@ -1,0 +1,42 @@
+{
+  "appName": {
+    "message": "Xuất Hóa Đơn Điện Tử",
+    "description": "Tên extension"
+  },
+  "appDescription": {
+    "message": "Tự động tải xuống toàn bộ hóa đơn điện tử từ trang quản lý hóa đơn của Tổng cục Thuế",
+    "description": "Mô tả extension"
+  },
+  "startDownload": {
+    "message": "Bắt đầu tải",
+    "description": "Nút bắt đầu tải hóa đơn"
+  },
+  "stopDownload": {
+    "message": "Dừng",
+    "description": "Nút dừng tải"
+  },
+  "noTokenError": {
+    "message": "Không tìm thấy Token đăng nhập! Vui lòng đảm bảo bạn đang đăng nhập.",
+    "description": "Thông báo lỗi khi không tìm thấy token"
+  },
+  "processing": {
+    "message": "Đang xử lý...",
+    "description": "Trạng thái đang xử lý"
+  },
+  "completed": {
+    "message": "Hoàn thành",
+    "description": "Trạng thái hoàn thành"
+  },
+  "totalInvoices": {
+    "message": "Tổng số hóa đơn",
+    "description": "Nhãn tổng số hóa đơn"
+  },
+  "downloaded": {
+    "message": "Đã tải",
+    "description": "Nhãn số lượng đã tải"
+  },
+  "errors": {
+    "message": "Lỗi",
+    "description": "Nhãn số lỗi"
+  }
+}
