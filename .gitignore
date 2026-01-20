@@ -1,6 +1,14 @@
 node_modules
 dist
 .DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.TemporaryItems
+.fseventsd
+Icon\r
 *.log
 .vscode
 .idea

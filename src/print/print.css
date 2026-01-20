@@ -1,0 +1,706 @@
+/* print.css - layout theo mẫu cửa sổ in của hoadondientu.gdt.gov.vn */
+
+* {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0;
+  font-size: 13pt;
+  font-family: "Times New Roman", serif;
+}
+
+#print-layout,
+#print-layout * {
+  /* break-inside: avoid !important; */
+}
+
+.bg-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background-image: url("https://hoadondientu.gdt.gov.vn/static/images/viewinvoice-bg.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 250%;
+  border: 3px double rgba(145, 87, 21, 0.69);
+  top: 0;
+  left: 0;
+}
+
+.print-page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0mm auto;
+}
+
+.main-page {
+  min-height: 900px;
+  margin-bottom: 5px;
+  font-family: "Times New Roman";
+  padding: 20px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+  border: 3px double rgba(145, 87, 21, 0.69);
+}
+
+.main-page .footer_content {
+  visibility: show;
+  opacity: 1;
+  filter: alpha(opacity=100);
+  color: white;
+  position: fixed;
+  bottom: 0;
+}
+
+.main-page .footer_content::after {
+  font-size: 10px;
+  content: "In chuyển đổi ngày " attr(data-footer) " từ Cổng thông tin điện tử của Cục Thuế ";
+}
+
+.heading-content .main-title {
+  font-size: 20pt;
+  text-align: center;
+  display: block;
+  font-weight: bold;
+  margin-bottom: 13px !important;
+}
+
+.heading-content p {
+  font-size: 13pt;
+  text-align: right;
+}
+
+.heading-content p.day {
+  text-align: center;
+  display: block;
+}
+
+.day .mg-bottom {
+  margin-bottom: 8px !important;
+  text-align: center;
+}
+
+.heading-content .top-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.heading-content .code-content {
+  display: inline-block;
+}
+
+.heading-content .code-ms {
+  display: flex;
+  font-size: 12pt;
+}
+
+.vip-divide {
+  width: 100%;
+  height: 0;
+  border-bottom: 1px solid rgba(145, 87, 21, 0.69);
+}
+
+.flex-li {
+  display: flex;
+}
+
+.content-info {
+  padding-top: 5px;
+}
+
+.content-info .list-fill-out {
+  list-style: none;
+  padding-inline-start: 0;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.content-info .list-fill-out li {
+  font-size: 13pt;
+}
+
+.content-info .tx-money {
+  text-align: right;
+}
+
+.content-info .square-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px 0px;
+}
+
+.content-info .square-list ul {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 25px;
+}
+
+.content-info .square-list ul li {
+  width: 35px;
+  height: 35px;
+  display: block;
+  border-left: 1px solid #000;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
+
+.content-info .square-list ul li:last-child {
+  border-right: 1px solid #000;
+}
+
+.table-horizontal-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.res-tb {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  margin: 10px 0px;
+  min-width: 250px;
+}
+
+.res-tb tr td {
+  border: 1px solid black;
+  padding: 6px 4px 6px 4px;
+  vertical-align: baseline;
+}
+
+.res-tb tr td.tx-center {
+  text-align: center;
+  min-width: 50px;
+}
+
+.res-tb thead tr th {
+  border: 1px solid black;
+  vertical-align: middle;
+  padding: 6px 4px 6px 4px;
+}
+
+.res-tb-new {
+  border-collapse: collapse;
+  border-spacing: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+.res-tb-new tr td,
+th {
+  border: 1px solid black;
+  padding: 6px 4px 6px 4px;
+  vertical-align: baseline;
+  text-align: center;
+  min-width: 30px;
+  height: 20px;
+}
+
+.ft-sign {
+  padding-top: 20px;
+}
+
+.ft-sign .sign-dx {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+.ft-sign .sign-dx-end {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.ft-sign .sign-dx h3 p {
+  text-align: center;
+  font-size: 13pt;
+  font-weight: 100;
+}
+
+.ft-sign .sign-dx h3 p:nth-child(2) {
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.ft-sign .fd-end {
+  padding-top: 120px;
+  text-align: center;
+}
+
+.ft-sign .appendix {
+  padding-top: 120px;
+}
+
+.ft-sign .appendix .apen-ul {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+}
+
+.ft-sign .appendix .apen-ul li {
+  margin-right: 25px;
+}
+
+.ft-sign .appendix .apen-ul li:last-child {
+  margin-right: unset;
+}
+
+.sign-box {
+  width: 260px !important;
+  padding: 5px !important;
+  border: 2px solid #23b709 !important;
+  background-image: url("https://hoadondientu.gdt.gov.vn/static/images/sign-check.jpg") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 45px bottom 10px !important;
+  background-size: 70px 60px !important;
+  margin-top: 10px !important;
+  font-weight: 500;
+}
+
+.sign-box span {
+  color: #23b709 !important;
+  font-size: 13pt !important;
+  text-align: left !important;
+  display: block !important;
+}
+
+.data-item-auto-w {
+  display: flex;
+  justify-content: left;
+  align-items: flex-start;
+  font-size: 13pt;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.data-item-auto-w .di-label {
+  min-height: 25px;
+  height: auto;
+  border-bottom: 1px dashed transparent;
+  display: flex;
+  align-items: flex-start;
+}
+
+.data-item-auto-w .di-value {
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 25px;
+  display: flex;
+  align-items: flex-start;
+  padding-left: 5px;
+  height: auto;
+  justify-content: center;
+}
+
+.data-item {
+  width: 100%;
+  display: flex;
+  justify-content: left;
+  align-items: flex-start;
+  font-size: 13pt;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.data-item .di-label {
+  min-height: 25px;
+  height: auto;
+  border-bottom: 1px dashed transparent;
+  display: flex;
+  align-items: flex-start;
+  white-space: nowrap;
+}
+
+.data-item .di-value {
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 25px;
+  display: flex;
+  align-items: flex-start;
+  padding-left: 5px;
+  height: auto;
+  justify-content: unset;
+}
+
+.space {
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+}
+
+.data-text {
+  width: 100%;
+  font-size: 13pt;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.code-content {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 12pt;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.code-content-bc26 {
+  position: absolute;
+  top: 30px;
+  right: 70px;
+  font-size: 12pt;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.font16 {
+  font-size: 16px;
+}
+
+.fontB {
+  font-weight: bold;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.p4 {
+  padding: 4px;
+}
+
+.ml-30 {
+  margin-left: 30px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-end {
+  text-align: end;
+}
+
+.di-label {
+  height: 25px;
+  border-bottom: 1px dashed transparent;
+  display: flex;
+  align-items: flex-start;
+}
+
+.di-value {
+  height: 25px;
+  box-sizing: border-box;
+  flex: 1;
+  border-bottom: 1px dashed #bbb;
+  display: flex;
+  align-items: flex-start;
+  padding-left: 10px;
+  justify-content: flex-start;
+}
+
+.di-gr {
+  width: 100%;
+  display: flex;
+  justify-content: left;
+  align-items: baseline;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 10px;
+  gap: 4px;
+}
+
+.header-nation {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 13pt;
+}
+
+.vn-header p,
+.en-header p {
+  margin: 0;
+}
+
+.vn-header hr {
+  text-align: center;
+  color: #000000;
+  width: 35%;
+}
+
+.vn-title {
+  text-transform: uppercase;
+}
+
+.vn-sub {
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.font14 {
+  font-size: 14px;
+}
+
+.ingay {
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 100;
+}
+
+.checkbox-custom {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(145, 87, 21, 0.69);
+  border-radius: 4px;
+  background-color: #fff;
+  position: relative;
+}
+
+.checkbox-custom:checked {
+  background-color: rgba(145, 87, 21, 0.69);
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+}
+
+.flex-center-gap10 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-custom:checked::after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  left: 4px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+@page {
+  size: A4;
+  margin: 0 !important;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    width: auto;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  table tr,
+  td {
+    page-break-inside: avoid;
+  }
+
+  table thead {
+    display: table-row-group !important;
+  }
+
+  .table-horizontal-wrapper {
+    page-break-inside: avoid;
+    padding-top: 5px;
+  }
+
+  .main-page {
+    margin: 0;
+    width: initial;
+    min-height: 296mm;
+    background: none;
+    border: none;
+  }
+
+  .main-page .footer_content::after {
+    color: black;
+  }
+
+  .ft-sign {
+    page-break-inside: avoid !important;
+    page-break-after: auto;
+  }
+
+  .fd-end {
+    padding-top: 0 !important;
+  }
+
+  .di-label {
+    height: 25px;
+    border-bottom: 1px dashed transparent;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .di-value {
+    height: 25px;
+    box-sizing: border-box;
+    flex: 1;
+    border-bottom: 1px dashed #bbb;
+    display: flex;
+    align-items: flex-start;
+    padding-left: 10px;
+    justify-content: flex-start;
+  }
+
+  .di-gr {
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: baseline;
+    color: rgba(0, 0, 0, 0.85);
+    margin-bottom: 10px;
+    gap: 4px;
+  }
+
+  .header-nation {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 13pt;
+  }
+
+  .vn-header p,
+  .en-header p {
+    margin: 0;
+  }
+
+  .vn-header hr {
+    text-align: center;
+    color: #000000;
+    width: 35%;
+  }
+
+  .vn-title {
+    text-transform: uppercase;
+  }
+
+  .vn-sub {
+    font-style: italic;
+    text-decoration: underline;
+  }
+
+  .code-content {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 12pt;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .font16 {
+    font-size: 16px;
+  }
+
+  .fontB {
+    font-weight: bold;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .p4 {
+    padding: 4px;
+  }
+
+  .ml-30 {
+    margin-left: 30px;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .text-left {
+    text-align: left;
+  }
+
+  .text-end {
+    text-align: end;
+  }
+
+  .code-content-bc26 {
+    position: absolute;
+    top: 30px;
+    right: 70px;
+    font-size: 12pt;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .checkbox-custom {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(145, 87, 21, 0.69);
+    border-radius: 4px;
+    background-color: #fff;
+    position: relative;
+  }
+
+  .checkbox-custom:checked {
+    background-color: rgba(145, 87, 21, 0.69);
+  }
+
+  .flex-center {
+    display: flex;
+    align-items: center;
+  }
+
+  .flex-center-gap10 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .checkbox-custom:checked::after {
+    content: "";
+    position: absolute;
+    top: 0px;
+    left: 4px;
+    width: 4px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+}

@@ -9,7 +9,9 @@
     "scripting",
     "storage",
     "downloads",
-    "cookies"
+    "cookies",
+    "debugger",
+    "offscreen"
   ],
   "host_permissions": [
     "https://hoadondientu.gdt.gov.vn/*"
@@ -21,6 +23,15 @@
     "service_worker": "src/background/index.ts",
     "type": "module"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/print/index.html",
+        "assets/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": ["https://hoadondientu.gdt.gov.vn/*"],
