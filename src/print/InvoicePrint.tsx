@@ -26,7 +26,7 @@ function useInvoiceData() {
     if (extractedTabId) {
       setTabId(parseInt(extractedTabId, 10));
     }
-    
+
     // Extract actual key (before &)
     const actualKey = hash.split('&')[0];
 
@@ -84,13 +84,14 @@ const InvoicePrint: React.FC = () => {
                 img.onerror = resolve; // Resolve even on error
               });
             });
-            
+
             Promise.all(imagePromises).then(() => {
               // Additional delay to ensure rendering is complete
               setTimeout(() => {
                 // Send ready signal to background with tabId
                 chrome.runtime.sendMessage({ action: 'CHECK_READY', tabId }, () => {
-                  // Background will handle PDF generation
+                  // Suppress "message port closed" warning by checking lastError
+                  void chrome.runtime.lastError;
                 });
               }, 500);
             });
@@ -98,11 +99,14 @@ const InvoicePrint: React.FC = () => {
         } else {
           // Fallback if fonts API not available
           setTimeout(() => {
-            chrome.runtime.sendMessage({ action: 'CHECK_READY', tabId }, () => {});
+            chrome.runtime.sendMessage({ action: 'CHECK_READY', tabId }, () => {
+              // Suppress "message port closed" warning by checking lastError
+              void chrome.runtime.lastError;
+            });
           }, 2000);
         }
       };
-      
+
       // Small delay to ensure React has rendered
       setTimeout(checkReady, 100);
     }
@@ -137,7 +141,7 @@ const InvoicePrint: React.FC = () => {
     <div id="print-layout" className="A4">
       <div className="print-page">
         <div className="bg-container"></div>
-        
+
         <div className="main-page">
           <div className="heading-content">
             <div className="top-content">
@@ -152,9 +156,9 @@ const InvoicePrint: React.FC = () => {
                 <b className="code-ms">Số: {data?.shdon ?? invoice.shdon}</b>
               </div>
             </div>
-            
+
             <h2 className="main-title">HÓA ĐƠN GIÁ TRỊ GIA TĂNG</h2>
-            
+
             <div className="day">
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <div className="data-item-auto-w">
@@ -182,7 +186,7 @@ const InvoicePrint: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
                 <div>
                   <div className="data-item">
@@ -256,7 +260,7 @@ const InvoicePrint: React.FC = () => {
                   </div>
                 </div>
               </li>
-              
+
               <li>
                 <div className="vip-divide" style={{ margin: '5px 0' }}></div>
               </li>
@@ -371,7 +375,7 @@ const InvoicePrint: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-              
+
               <div style={{ flex: 1 }}>
                 <table className="res-tb">
                   <tbody>
@@ -396,7 +400,7 @@ const InvoicePrint: React.FC = () => {
                     <tr>
                       <td className="tx-center">Tổng tiền phí</td>
                       <td className="tx-center" style={{ minWidth: '200px', maxWidth: '300px' }}>
-                        
+
                       </td>
                     </tr>
                     <tr>
@@ -404,7 +408,7 @@ const InvoicePrint: React.FC = () => {
                         Tổng tiền chiết khấu thương mại
                       </td>
                       <td className="tx-center" style={{ minWidth: '200px', maxWidth: '300px' }}>
-                        
+
                       </td>
                     </tr>
                     <tr>
