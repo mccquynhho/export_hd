@@ -26,14 +26,36 @@ Dữ liệu hóa đơn được lấy qua request sau:
   - `shdon`: Số hóa đơn (VD: 124).
   - `khmshdon`: Mẫu số (VD: 1).
 
-### 2.2. Data Mapping Strategy
-Trên giao diện danh sách hóa đơn, mỗi dòng (`tr`) có thuộc tính `data-row-key` định dạng:
-`UUID_MSTNguoiBan_MauSo_KyHieu_SoHoaDon`
-*Ví dụ:* `aeaf6..._0109989663_1_C25TTN_124`
+Dữ liệu list hoá đơn được lấy qua request sau:
+- **Base URL:** `https://hoadondientu.gdt.gov.vn:30000`
+- **Path:** `/query/invoices/purchase`
+- **Method:** `GET`
+- **Headers Bắt Buộc:**
+  - `Authorization`: `Bearer <TOKEN>` (Lấy từ Cookie `jwt`).
+  - `Content-Type`: `application/json`
+- **Query Parameters:**
+  - `sort`: `tdlap:desc`
+  - `size`: `50`
+  - `state`: `state` (Trường hợp request page 1 thì không có state, page 2 thì có state được lấy từ response của request page 1, page 3 thì có state được lấy từ response của request page 2, ...)
+  - `search`: `tdlap=ge={start_time};tdlap=le={end_time};ttxly=={type}`
+  - `start_time`: `30/12/2025T00:00:00`
+  - `end_time`: `29/01/2026T23:59:59`
+  - `type`: `5`, `6`, `8` (hoá đơn mua vào)
+  - Khoảng thời gian tối đa giữa start time và end time là 30 ngày.
+- **Response:**
+  - `datas`: `any[]` (danh sách hoá đơn)
+  - `total`: `number` (tổng số hoá đơn)
+  - `state`: `string | null` (trạng thái xử lý hoá đơn, state được lấy từ response của request page 1, page 2, ..., = null là hết dữ liệu)
+  - `time`: `number` (thời gian xử lý hoá đơn)
+  - `[k: string]`: `any` (các thông tin khác)
+
+
 
 **Logic trích xuất:**
-1. Split chuỗi `data-row-key` bằng dấu `_`.
-2. Map vào params API:
+1. Người dùng chọn khoảng thời gian xuất hoá đơn
+2. Lấy dữ liệu hoá đơn từ API `/query/invoices/purchase` cho tất cả các loại hoá đơn (type=5,6,8) của tất cả các page cho đến khi state = null. Trường hợp khoảng thời gian nhiều hơn 30 ngày thì chia thành nhiều request.
+
+3. Map vào params API:
    - `nbmst` = parts[1]
    - `khmshdon` = parts[2]
    - `khhdon` = parts[3]
@@ -43,16 +65,8 @@ Trên giao diện danh sách hóa đơn, mỗi dòng (`tr`) có thuộc tính `d
 
 ### Phase 1: Authentication Handling (Content Script)
 - Extension cần tự động lấy Token hiện hành của user.
-- **Cách 1 (Ưu tiên):** Kiểm tra `localStorage.getItem('token')` hoặc `sessionStorage`.
-- **Cách 2 (Fallback):** Đọc cookie tên `jwt` từ `document.cookie`.
-- Nếu không có token, hiển thị cảnh báo yêu cầu user đăng nhập lại.
 
-### Phase 2: Crawling & Queueing (Content Script)
-1. User click "Tải tất cả" trên Popup.
-2. Script quét toàn bộ `tr[data-row-key]` trên trang hiện tại.
-3. Parse key thành danh sách object `InvoiceParams`.
-4. Gửi danh sách này (`message: START_DOWNLOAD`) về **Background Worker**.
-5. (Tùy chọn) Tự động bấm nút Next Page (`.ant-pagination-next`) và lặp lại quy trình.
+### Phase 2: Lấy dữ liệu hoá đơn từ API `/query/invoices/purchase` cho tất cả các loại hoá đơn (type=5,6,8) của tất cả các page cho đến khi state = null
 
 ### Phase 3: Downloading (Background Service Worker)
 Background worker chịu trách nhiệm gọi API để tránh bị đóng khi chuyển tab/trang.

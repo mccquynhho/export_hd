@@ -11,7 +11,7 @@ import { sleep } from '@/utils/helpers';
 import type { GetAuthTokenRequest, GetAuthTokenResponse } from '@/types';
 import type { ClosePrintTabRequest } from '@/types';
 
-const DOWNLOAD_DELAY = 300; // Base delay between downloads to avoid rate limiting
+const DOWNLOAD_DELAY = 600; // Base delay between downloads to avoid rate limiting
 const DOWNLOAD_DELAY_ON_429 = 2000; // @instruction.md:91
 const COOKIE_URL = 'https://hoadondientu.gdt.gov.vn';
 const COOKIE_NAME = 'jwt';
@@ -51,10 +51,10 @@ async function downloadInvoice(
   // Check if response contains XML or PDF
   if (data.xml) {
     // Decode base64 XML if needed, or use as-is
-    const xmlContent = typeof data.xml === 'string' 
+    const xmlContent = typeof data.xml === 'string'
       ? (data.xml.startsWith('<?xml') ? data.xml : atob(data.xml))
       : JSON.stringify(data, null, 2);
-    
+
     blob = new Blob([xmlContent], { type: 'application/xml' });
     filename = `HoaDon_${invoice.nbmst}_${invoice.shdon}.xml`;
   } else if (data.pdfUrl) {
@@ -94,10 +94,10 @@ async function downloadInvoice(
 async function waitForTabReady(tabId: number, timeout = 15000): Promise<void> {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
-    
+
     // Register this tab as pending
     pendingTabs.set(tabId, { resolve, reject });
-    
+
     const checkReady = () => {
       chrome.tabs.get(tabId, (tab) => {
         if (chrome.runtime.lastError) {
@@ -105,7 +105,7 @@ async function waitForTabReady(tabId: number, timeout = 15000): Promise<void> {
           reject(new Error(chrome.runtime.lastError.message));
           return;
         }
-        
+
         if (tab.status === 'complete') {
           // Print page will send CHECK_READY message when ready
           // Wait for it or timeout
@@ -127,7 +127,7 @@ async function waitForTabReady(tabId: number, timeout = 15000): Promise<void> {
         }
       });
     };
-    
+
     checkReady();
   });
 }
@@ -141,23 +141,23 @@ async function generatePDFFromInvoice(
 ): Promise<void> {
   const key = buildPrintKey(invoice);
   await savePrintData(key, data, invoice);
-  
+
   // Create hidden tab first to get tabId
-  const tab = await chrome.tabs.create({ 
+  const tab = await chrome.tabs.create({
     url: chrome.runtime.getURL('src/print/index.html'),
-    active: false 
+    active: false
   });
   const tabId = tab.id!;
-  
+
   // Update URL with hash containing key and tabId
   const url = chrome.runtime.getURL(`src/print/index.html#${encodeURIComponent(key)}&tabId=${tabId}`);
   await chrome.tabs.update(tabId, { url });
-  
+
   try {
     // Wait for tab to load and render
     log('Waiting for tab to render', { tabId, shdon: invoice.shdon });
     await waitForTabReady(tabId, 15000);
-    
+
     // Attach debugger
     await new Promise<void>((resolve, reject) => {
       chrome.debugger.attach({ tabId }, '1.0', () => {
@@ -168,9 +168,9 @@ async function generatePDFFromInvoice(
         }
       });
     });
-    
+
     log('Debugger attached, calling Page.printToPDF', { tabId });
-    
+
     // Enable Page domain
     await new Promise<void>((resolve, reject) => {
       chrome.debugger.sendCommand({ tabId }, 'Page.enable', {}, () => {
@@ -181,7 +181,7 @@ async function generatePDFFromInvoice(
         }
       });
     });
-    
+
     // Call Page.printToPDF
     const pdfData = await new Promise<string>((resolve, reject) => {
       chrome.debugger.sendCommand(
@@ -207,9 +207,9 @@ async function generatePDFFromInvoice(
         }
       );
     });
-    
+
     log('PDF generated, downloading', { shdon: invoice.shdon });
-    
+
     // Download PDF
     const base64Url = `data:application/pdf;base64,${pdfData}`;
     await new Promise<void>((resolve, reject) => {
@@ -228,9 +228,9 @@ async function generatePDFFromInvoice(
         }
       );
     });
-    
+
     log('PDF downloaded successfully', { shdon: invoice.shdon });
-    
+
   } catch (error) {
     console.error('[Background] Error generating PDF:', error);
     throw error;
@@ -246,7 +246,7 @@ async function generatePDFFromInvoice(
     } catch (e) {
       log('Error detaching debugger:', e);
     }
-    
+
     // Close tab
     try {
       await chrome.tabs.remove(tabId);
@@ -396,12 +396,12 @@ chrome.runtime.onMessage.addListener(
         })
         .catch((error) => {
           console.error('[Background] Batch processing error:', error);
-          sendResponse({ 
-            success: false, 
-            error: error instanceof Error ? error.message : 'Unknown error' 
+          sendResponse({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
           });
         });
-      
+
       // Return true to indicate we will send a response asynchronously
       return true;
     }
