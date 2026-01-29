@@ -1,11 +1,16 @@
 /// <reference types="chrome" />
-import type { StartCrawlRequest, StopCrawlRequest, MessageResponse, InvoiceParams } from '@/types';
+import type { StartCrawlRequest, StopCrawlRequest, MessageResponse, InvoiceParams, ProgressUpdate } from '@/types';
 import { getMessage } from '@/utils/helpers';
 import { fetchAllPurchaseInvoices } from '@/utils/api';
 import type { GetAuthTokenRequest, GetAuthTokenResponse } from '@/types';
 
 // Invoice types to fetch (mua vào)
 const INVOICE_TYPES = [5, 6, 8];
+const INVOICE_TYPE_NAMES: Record<number, string> = {
+  5: 'Đã cấp mã hoá đơn',
+  6: 'Cục thuế đã nhận không mã',
+  8: 'Cục thuế đã nhận hoá đơn có mã khởi tạo từ máy tính tiền'
+};
 
 // Flag to signal stop request
 let stopRequested = false;
@@ -22,6 +27,13 @@ export function isStopRequested(): boolean {
  */
 function resetStopFlag(): void {
   stopRequested = false;
+}
+
+/**
+ * Update progress in storage for popup to read
+ */
+function updateProgress(progress: ProgressUpdate): void {
+  chrome.storage.local.set({ progress });
 }
 
 /**
@@ -63,9 +75,13 @@ function mapToInvoiceParams(invoice: any): InvoiceParams {
 async function startDownloadProcess(startDate: string, endDate: string): Promise<void> {
   resetStopFlag();
 
+  // Initialize progress
+  updateProgress({ phase: 'idle', message: 'Đang khởi tạo...' });
+
   const token = await getTokenFromBackground();
 
   if (!token) {
+    updateProgress({ phase: 'idle', message: 'Lỗi: Không lấy được token' });
     alert(getMessage('noTokenError'));
     return;
   }
@@ -79,16 +95,26 @@ async function startDownloadProcess(startDate: string, endDate: string): Promise
 
   console.log(`[Export HD] Fetching invoices from ${startDate} to ${endDate}`);
 
-  let totalInvoices = 0;
+  let totalFetched = 0;
+  const allInvoiceParams: InvoiceParams[] = [];
 
   try {
-    // Fetch all invoice types
+    // Phase 1: Fetch all invoice types
     for (const invoiceType of INVOICE_TYPES) {
       // Check for stop request
       if (stopRequested) {
         console.log('[Export HD] Stop requested, aborting...');
+        updateProgress({ phase: 'stopped', message: 'Đã dừng bởi người dùng' });
         return;
       }
+
+      updateProgress({
+        phase: 'fetching',
+        invoiceType,
+        invoiceTypeName: INVOICE_TYPE_NAMES[invoiceType],
+        totalFetched,
+        message: `Đang lấy danh sách ${INVOICE_TYPE_NAMES[invoiceType]}...`
+      });
 
       console.log(`[Export HD] Fetching invoice type: ${invoiceType}`);
 
@@ -97,30 +123,61 @@ async function startDownloadProcess(startDate: string, endDate: string): Promise
       // Check for stop request after fetch
       if (stopRequested) {
         console.log('[Export HD] Stop requested, aborting...');
+        updateProgress({ phase: 'stopped', message: 'Đã dừng bởi người dùng' });
         return;
       }
 
       if (invoices.length > 0) {
         // Map to InvoiceParams
         const invoiceParams: InvoiceParams[] = invoices.map(mapToInvoiceParams);
-        totalInvoices += invoiceParams.length;
+        allInvoiceParams.push(...invoiceParams);
+        totalFetched += invoiceParams.length;
 
-        console.log(`[Export HD] Found ${invoiceParams.length} invoices for type ${invoiceType}. Total: ${totalInvoices}`);
-
-        // Send invoice data to background for download
-        chrome.runtime.sendMessage({
-          action: 'DOWNLOAD_BATCH',
-          data: invoiceParams,
-          token: token,
+        updateProgress({
+          phase: 'fetching',
+          invoiceType,
+          invoiceTypeName: INVOICE_TYPE_NAMES[invoiceType],
+          fetchedCount: invoiceParams.length,
+          totalFetched,
+          message: `Đã lấy ${invoiceParams.length} ${INVOICE_TYPE_NAMES[invoiceType]}`
         });
+
+        console.log(`[Export HD] Found ${invoiceParams.length} invoices for type ${invoiceType}. Total: ${totalFetched}`);
       }
     }
 
+    // Phase 2: Send to background for download
+    if (allInvoiceParams.length > 0 && !stopRequested) {
+      updateProgress({
+        phase: 'downloading',
+        downloadCurrent: 0,
+        downloadTotal: allInvoiceParams.length,
+        message: `Bắt đầu tải ${allInvoiceParams.length} hoá đơn...`
+      });
+
+      // Send invoice data to background for download
+      chrome.runtime.sendMessage({
+        action: 'DOWNLOAD_BATCH',
+        data: allInvoiceParams,
+        token: token,
+      });
+    }
+
     if (!stopRequested) {
-      console.log(`[Export HD] Completed. Total invoices: ${totalInvoices}`);
+      updateProgress({
+        phase: 'completed',
+        totalFetched,
+        downloadTotal: allInvoiceParams.length,
+        message: `Hoàn thành! Đã gửi ${allInvoiceParams.length} hoá đơn để tải`
+      });
+      console.log(`[Export HD] Completed. Total invoices: ${totalFetched}`);
     }
   } catch (error) {
     console.error('[Export HD] Error in download process:', error);
+    updateProgress({
+      phase: 'idle',
+      message: `Lỗi: ${error instanceof Error ? error.message : 'Unknown error'}`
+    });
     throw error;
   }
 }
@@ -157,6 +214,7 @@ chrome.runtime.onMessage.addListener(
 
     if (request.action === 'STOP_CRAWL') {
       stopRequested = true;
+      updateProgress({ phase: 'stopped', message: 'Đang dừng...' });
       console.log('[Export HD] Stop signal received');
       sendResponse({ status: 'stopped' });
       return true;
@@ -165,3 +223,4 @@ chrome.runtime.onMessage.addListener(
 );
 
 console.log('[Export HD] Content script loaded');
+

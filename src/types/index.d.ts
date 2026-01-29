@@ -65,6 +65,19 @@ export interface ProgressState {
   errorMessages: string[];
 }
 
+// Real-time progress update for popup display
+export interface ProgressUpdate {
+  phase: 'fetching' | 'downloading' | 'idle' | 'completed' | 'stopped';
+  invoiceType?: number;        // 5, 6, or 8
+  invoiceTypeName?: string;    // "Loại 5", "Loại 6", "Loại 8"
+  fetchedCount?: number;       // Number of invoices fetched for current type
+  totalFetched?: number;       // Total invoices fetched across all types
+  downloadCurrent?: number;    // Current download index (1-based)
+  downloadTotal?: number;      // Total invoices to download
+  currentInvoice?: string;     // Current invoice number being downloaded
+  message?: string;            // Optional status message
+}
+
 export interface InvoiceLine {
   id?: string;
   idhdon?: string;

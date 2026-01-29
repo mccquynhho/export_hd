@@ -5,6 +5,7 @@ import type {
   InvoiceDetailResponse,
   PrintInvoiceRequest,
   PrintInvoiceResponse,
+  ProgressUpdate,
 } from '@/types';
 import { fetchInvoiceDetail } from '@/utils/api';
 import { sleep } from '@/utils/helpers';
@@ -20,11 +21,42 @@ const DEBUG = true;
 // Map to track tabs waiting for ready signal
 const pendingTabs = new Map<number, { resolve: () => void; reject: (error: Error) => void }>();
 
+// Flag to signal stop download request
+let downloadStopRequested = false;
+
+/**
+ * Check if download stop has been requested
+ */
+function isDownloadStopRequested(): boolean {
+  return downloadStopRequested;
+}
+
+/**
+ * Reset download stop flag
+ */
+function resetDownloadStopFlag(): void {
+  downloadStopRequested = false;
+}
+
 const log = (...args: unknown[]) => {
   if (DEBUG) {
     console.log('[Background]', ...args);
   }
 };
+
+/**
+ * Update download progress in storage for popup to read
+ */
+function updateDownloadProgress(current: number, total: number, invoice?: InvoiceParams): void {
+  const progress: ProgressUpdate = {
+    phase: 'downloading',
+    downloadCurrent: current,
+    downloadTotal: total,
+    currentInvoice: invoice ? invoice.shdon : undefined,
+    message: invoice ? `Đang tải hoá đơn ${invoice.shdon} (${current}/${total})` : `Đang tải ${current}/${total}`
+  };
+  chrome.storage.local.set({ progress });
+}
 
 /**
  * Convert blob to base64 data URI
@@ -277,9 +309,31 @@ async function fetchAndDownloadInvoiceWithPrint(
  * Process batch of invoices with rate limiting
  */
 async function processBatch(invoices: InvoiceParams[], token: string): Promise<void> {
+  resetDownloadStopFlag();
   log('Processing batch', { count: invoices.length });
-  for (const invoice of invoices) {
+  const total = invoices.length;
+
+  for (let i = 0; i < invoices.length; i++) {
+    // Check for stop signal
+    if (isDownloadStopRequested()) {
+      log('Download stopped by user');
+      const stoppedProgress: ProgressUpdate = {
+        phase: 'stopped',
+        downloadCurrent: i,
+        downloadTotal: total,
+        message: `Đã dừng tại hoá đơn ${i}/${total}`
+      };
+      chrome.storage.local.set({ progress: stoppedProgress });
+      return;
+    }
+
+    const invoice = invoices[i];
+    const current = i + 1;
+
     try {
+      // Update progress before each download
+      updateDownloadProgress(current, total, invoice);
+
       await fetchAndDownloadInvoiceWithPrint(invoice, token);
       await sleep(DOWNLOAD_DELAY);
     } catch (error) {
@@ -292,6 +346,17 @@ async function processBatch(invoices: InvoiceParams[], token: string): Promise<v
       }
       // Continue with next invoice even if one fails
     }
+  }
+
+  // Mark as completed only if not stopped
+  if (!isDownloadStopRequested()) {
+    const completedProgress: ProgressUpdate = {
+      phase: 'completed',
+      downloadCurrent: total,
+      downloadTotal: total,
+      message: `Hoàn thành tải ${total} hoá đơn`
+    };
+    chrome.storage.local.set({ progress: completedProgress });
   }
 }
 
@@ -427,6 +492,18 @@ chrome.runtime.onMessage.addListener(
       if (tabId) {
         chrome.tabs.remove(tabId);
       }
+      return false;
+    }
+
+    // Handle stop download request
+    if ((request as any).action === 'STOP_DOWNLOAD') {
+      downloadStopRequested = true;
+      log('Download stop requested');
+      const stoppedProgress: ProgressUpdate = {
+        phase: 'stopped',
+        message: 'Đang dừng tải...'
+      };
+      chrome.storage.local.set({ progress: stoppedProgress });
       return false;
     }
   }
