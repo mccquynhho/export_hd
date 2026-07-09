@@ -106,8 +106,9 @@ async function downloadInvoice(
     chrome.downloads.download(
       {
         url: base64,
-        filename: `Invoices/${filename}`,
+        filename: `Invoices/jsons/${filename}`,
         conflictAction: 'overwrite',
+        saveAs: false,
       },
       (_downloadId: number) => {
         if (chrome.runtime.lastError) {
@@ -248,8 +249,9 @@ async function generatePDFFromInvoice(
       chrome.downloads.download(
         {
           url: base64Url,
-          filename: `Invoices/HoaDon_${invoice.nbmst}_${invoice.shdon}_Print.pdf`,
+          filename: `Invoices/pdfs/HoaDon_${invoice.nbmst}_${invoice.shdon}_Print.pdf`,
           conflictAction: 'overwrite',
+          saveAs: false,
         },
         (_downloadId: number) => {
           if (chrome.runtime.lastError) {

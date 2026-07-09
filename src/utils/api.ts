@@ -1,7 +1,7 @@
 import type { InvoiceParams, InvoiceDetailResponse, InvoiceQuery, InvoiceResponse } from '@/types';
 import { retry, sleep } from './helpers';
 
-const API_BASE_URL = 'https://hoadondientu.gdt.gov.vn:30000';
+const API_BASE_URL = 'https://hoadondientu.gdt.gov.vn/api';
 const API_URL_INVOICE_DETAIL = API_BASE_URL + '/query/invoices/detail';
 const API_URL_PURCHASE_INVOICES = API_BASE_URL + '/query/invoices/purchase';
 const REQUEST_DELAY = 2000;
