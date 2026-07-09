@@ -10,11 +10,16 @@ Không hardcode chuỗi → dùng /_locales/vi/messages.json
 Xây dựng Chrome Extension (Manifest V3, Vite, TypeScript) để tải hàng loạt hóa đơn từ `hoadondientu.gdt.gov.vn`.
 **Core Mechanism:** Thay vì cào HTML chi tiết, extension sẽ lấy danh sách ID từ bảng, sau đó **gọi trực tiếp API nội bộ** `/query/invoices/detail` để lấy dữ liệu JSON gốc.
 
+Hóa đơn type:
+  5: 'Đã cấp mã hoá đơn',
+  6: 'Cục thuế đã nhận không mã',
+  8: 'Cục thuế đã nhận hoá đơn có mã khởi tạo từ máy tính tiền'
+
 ## 2. Technical Specs
 
 ### 2.1. API Details (Reverse Engineered)
 Dữ liệu hóa đơn được lấy qua request sau:
-- **Base URL:** `https://hoadondientu.gdt.gov.vn:30000`
+- **Base URL:** `https://hoadondientu.gdt.gov.vn/api`
 - **Path:** `/query/invoices/detail`
 - **Method:** `GET`
 - **Headers Bắt Buộc:**
@@ -27,7 +32,7 @@ Dữ liệu hóa đơn được lấy qua request sau:
   - `khmshdon`: Mẫu số (VD: 1).
 
 Dữ liệu list hoá đơn được lấy qua request sau:
-- **Base URL:** `https://hoadondientu.gdt.gov.vn:30000`
+- **Base URL:** `https://hoadondientu.gdt.gov.vn/api`
 - **Path:** `/query/invoices/purchase`
 - **Method:** `GET`
 - **Headers Bắt Buộc:**
@@ -109,7 +114,7 @@ Viết hàm `extractInvoicesFromDOM()`:
 - Regex/Split logic để tách `data-row-key` thành object sạch.
 
 ### 4.3. Manifest Configuration
-- `host_permissions`: Thêm `https://hoadondientu.gdt.gov.vn:30000/*` (Lưu ý port 30000).
+- `host_permissions`: Thêm `https://hoadondientu.gdt.gov.vn/api/*`.
 - `permissions`: `downloads`, `storage`, `cookies`.
   - Nếu xuất PDF bằng CDP: thêm `debugger`.
 

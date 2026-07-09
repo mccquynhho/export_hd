@@ -97,6 +97,7 @@ async function startDownloadProcess(startDate: string, endDate: string): Promise
 
   let totalFetched = 0;
   const allInvoiceParams: InvoiceParams[] = [];
+  const invoicesByType: Record<number, any[]> = { 5: [], 6: [], 8: [] };
 
   try {
     // Phase 1: Fetch all invoice types
@@ -128,7 +129,10 @@ async function startDownloadProcess(startDate: string, endDate: string): Promise
       }
 
       if (invoices.length > 0) {
-        // Map to InvoiceParams
+        // Store raw invoices for Excel
+        invoicesByType[invoiceType] = invoices;
+        
+        // Map to InvoiceParams for JSON/PDF download
         const invoiceParams: InvoiceParams[] = invoices.map(mapToInvoiceParams);
         allInvoiceParams.push(...invoiceParams);
         totalFetched += invoiceParams.length;
@@ -144,6 +148,27 @@ async function startDownloadProcess(startDate: string, endDate: string): Promise
 
         console.log(`[Export HD] Found ${invoiceParams.length} invoices for type ${invoiceType}. Total: ${totalFetched}`);
       }
+    }
+
+    // Generate and download Excel if there is data
+    if (totalFetched > 0 && !stopRequested) {
+      updateProgress({
+        phase: 'fetching',
+        message: `Đang tạo file Excel cho ${totalFetched} hoá đơn...`
+      });
+      
+      const { generateExcelBase64 } = await import('../utils/excel');
+      const base64Excel = generateExcelBase64(invoicesByType, startDate, endDate);
+      
+      // Clean dates for filename
+      const safeStart = startDate.replace(/-/g, '');
+      const safeEnd = endDate.replace(/-/g, '');
+      
+      chrome.runtime.sendMessage({
+        action: 'DOWNLOAD_EXCEL',
+        base64: base64Excel,
+        filename: `DanhSachHoaDon_${safeStart}_${safeEnd}.xlsx`
+      });
     }
 
     // Phase 2: Send to background for download

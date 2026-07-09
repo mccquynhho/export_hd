@@ -13,6 +13,12 @@ export interface DownloadRequest {
   token: string;
 }
 
+export interface DownloadExcelRequest {
+  action: 'DOWNLOAD_EXCEL';
+  base64: string;
+  filename: string;
+}
+
 // Request to get auth token from background
 export interface GetAuthTokenRequest {
   action: 'GET_AUTH_TOKEN';

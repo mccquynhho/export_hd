@@ -10,7 +10,7 @@ import type {
 import { fetchInvoiceDetail } from '@/utils/api';
 import { sleep } from '@/utils/helpers';
 import type { GetAuthTokenRequest, GetAuthTokenResponse } from '@/types';
-import type { ClosePrintTabRequest } from '@/types';
+import type { ClosePrintTabRequest, DownloadExcelRequest } from '@/types';
 
 const DOWNLOAD_DELAY = 600; // Base delay between downloads to avoid rate limiting
 const DOWNLOAD_DELAY_ON_429 = 2000; // @instruction.md:91
@@ -450,10 +450,21 @@ chrome.runtime.onMessage.addListener(
 // Listen for download requests from content script
 chrome.runtime.onMessage.addListener(
   (
-    request: DownloadRequest | GetAuthTokenRequest | PrintInvoiceRequest | ClosePrintTabRequest,
+    request: DownloadRequest | GetAuthTokenRequest | PrintInvoiceRequest | ClosePrintTabRequest | DownloadExcelRequest | any,
     _sender: chrome.runtime.MessageSender,
-    sendResponse: (response: { success?: boolean; error?: string } | GetAuthTokenResponse | PrintInvoiceResponse) => void
+    sendResponse: (response: { success?: boolean; error?: string } | GetAuthTokenResponse | PrintInvoiceResponse | void) => void
   ) => {
+    if (request.action === 'DOWNLOAD_EXCEL') {
+      console.log('[Background] Received DOWNLOAD_EXCEL', request.filename);
+      const url = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${request.base64}`;
+      chrome.downloads.download({
+        url: url,
+        filename: request.filename,
+        conflictAction: 'overwrite',
+        saveAs: false,
+      });
+      return false; // No async response needed
+    }
     if (request.action === 'DOWNLOAD_BATCH') {
       console.log('[Background] Received DOWNLOAD_BATCH', request.data);
       processBatch(request.data, request.token)
